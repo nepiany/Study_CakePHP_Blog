@@ -31,7 +31,9 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
-	public $components = array('Session',
+	public $components = array(
+		'Session',
+		'Acl',
 		'Auth' => array(
 			// 以下はデフォルトと同じ設定なので必要ない
 			'loginAction' => array(

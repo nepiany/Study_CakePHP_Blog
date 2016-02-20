@@ -5,13 +5,15 @@ class PostsController extends AppController {
 	// public $helpers = array('Html', 'Form');
 
 	public function index() {
+
+		// パラメータつきでfindする場合
 		// $params = array(
 		// 	'order' => 'modified desc',
 		// 	'limit' => 2
 		// );
 		// $this->set('posts', $this->Post->find('all', $params));
+
 		$this->set('posts', $this->Post->find('all'));
-		// $this->set('title_for_layout', '記事一覧');
 	}
 
 	public function view($id = null) {
@@ -20,7 +22,15 @@ class PostsController extends AppController {
 	}
 
 	public function add() {
+
 		if ($this->request->is('post')) {
+
+			// todo ここでpostにuserIdをセットしたい
+			// if (is_null($this->viewVars['authUser'])) {
+			// 	throw new Exception('not logged in');
+			// }
+			// $userId = $this->viewVars['authUser']['id'];
+			// $this->request->data['user_id'] = $userId;
 
 			if ($this->Post->save($this->request->data)) {
 				//うまく行った場合
@@ -38,6 +48,17 @@ class PostsController extends AppController {
 		if ($this->request->is('get')) {
 			$this->request->data = $this->Post->read();
 		} else {
+
+			// 投稿者本人でなければException
+			if (is_null($this->viewVars['authUser'])) {
+				throw new Exception('not logged in');
+			}
+
+			$userId = $this->viewVars['authUser']['id'];
+			if (!$this->Post->isAuthor($userId, $id)) {
+				throw new Exception('not authorized');
+			}
+
 			if ($this->Post->save($this->request->data)) {
 				$this->Session->setFlash('success!');
 				$this->redirect(array('action'=>'index'));
@@ -60,6 +81,16 @@ class PostsController extends AppController {
 		// ajaxで削除する場合
 		if ($this->request->is('ajax')) {
 			if ($this->Post->delete($id)) {
+				// 投稿者本人でなければException
+				if (is_null($this->viewVars['authUser']['id'])) {
+					throw new Exception('not logged in');
+				}
+
+				$userId = $this->viewVars['authUser']['id'];
+				if (!$this->Post->isAuthor($userId, $id)) {
+					throw new Exception('not authorized');
+				}
+
 				$this->autoRender = false;
 				$this->autoLayout = false;
 				$response = array('id' => $id);

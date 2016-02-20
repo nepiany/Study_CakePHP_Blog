@@ -7,25 +7,40 @@
 <?php foreach($posts as $post) : ?>
 	<li id="post_<?php echo h($post['Post']['id']); ?>">
 	<?php
-		// debug($post);
-		// echo h($post['Post']['title']);
+		// debug($post); // デバッグメッセージ
 		echo $this->Html->link($post['Post']['title'], '/posts/view/'.$post['Post']['id']);
 	?>
-	<?php echo $this->Html->link('編集', array('action'=>'edit', $post['Post']['id']));
-	?>
+	<small>
+		written by
+		<?php
+			echo h($post['User']['nickname']).' ';
+		?>
+	</small>
 	<?php
-		// echo $this->Form->postLink('削除', array('action'=>'delete', $post['Post']['id']), array('confirm'=>'sure?'));
+		// 投稿ユーザならば編集・削除できる
+		if (isset($authUser) && $post['User']['id'] === $authUser['id']) {
+			echo $this->Html->link('編集', array('action'=>'edit', $post['Post']['id'])).' ';
 
-		echo $this->Html->link('削除', '#', array('class' => 'delete', 'data-post-id' => $post['Post']['id']));
+			// 直接以下のリンクでも削除できる
+			// echo $this->Form->postLink('削除', array('action'=>'delete', $post['Post']['id']), array('confirm'=>'sure?'));
+
+			echo $this->Html->link('削除', '#', array('class' => 'delete', 'data-post-id' => $post['Post']['id']));
+		}
 	?>
 	</li>
 <?php endforeach; ?>
 
 </ul>
 
-<h2>Add Post</h2>
-<?php echo $this->Html->link('Add post', array('controller'=>'posts', 'action'=>'add'));
-?>
+<?php if (isset($authUser)) : ?>
+
+	<h2>Add Post</h2>
+	<?php
+		echo $this->Html->link('Add post', array('controller'=>'posts', 'action'=>'add'));
+	?>
+
+<?php endif; ?>
+
 
 <script>
 $(function () {

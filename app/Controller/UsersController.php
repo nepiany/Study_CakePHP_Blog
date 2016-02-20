@@ -31,7 +31,6 @@ class UsersController extends AppController {
 	public function login() {
 		if ($this->request->is('post')) {
 			if ($this->Auth->login()) {
-				$this->Session->write('user', $this->Auth->user());
 				return $this->redirect(array('controller'=>'posts', 'action'=>'index'));
 			} else {
 				$this->Session->setFlash('login failed...');

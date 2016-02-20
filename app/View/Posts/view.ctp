@@ -1,6 +1,29 @@
-<h2><?php echo h($post['Post']['title']); ?></h2>
+<h2>
+	<?php echo h($post['Post']['title']); ?>
+</h2>
 
-<p><?php echo h($post['Post']['body']); ?></p>
+<p>
+	<?php echo h($post['Post']['body']); ?>
+</p>
+
+<p>
+	<small>
+		<?php
+			if (isset($authUser)) {
+				// if ($this->Post->isAuthor($authUser['id'], $post['Post']['id'])) {
+				if ($authUser['id'] === $post['Post']['user_id']) {
+					echo $this->Html->link('編集', array('action'=>'edit', $post['Post']['id']));
+				} else {
+					// todo お気に入り状態に応じて見た目を変える
+					echo $this->Html->link('お気に入り', 'addFavorite');
+				}
+			} else {
+				// todo ログインへのリンク
+				echo $this->Html->link('会員になればお気に入りできます', array('controller'=>'users', 'action'=>'login'));
+			}
+		?>
+	</small>
+</p>
 
 <h2>Comments</h2>
 
@@ -15,8 +38,6 @@
 </ul>
 
 <h3>Add Comment</h3>
-
-<?php echo $this->Html->url('/', false); ?>
 
 <?php echo $this->Form->create('Comment', array('action' => 'add'));
 	echo $this->Form->input('commenter');
