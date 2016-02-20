@@ -1,6 +1,6 @@
-<?php $this->assign('title', '記事一覧です'); ?>
+<?php $this->assign('title', '記事一覧です(top page)'); ?>
 
-<h2>記事一覧</h2>
+<h2>記事一覧(トップページ)</h2>
 
 <ul>
 

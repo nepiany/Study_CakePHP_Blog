@@ -6,18 +6,18 @@ class User extends AppModel {
 	public $hasMany = array('Post', 'Comment');
 
 	public $validate = array(
-		'id' => array(
+		'email' => array(
 			array(
 				'rule' => 'isUnique', //重複禁止
 				'message' => '既に使用されている名前です。'
 			),
 			array(
 				'rule' => 'email',
-				'message' => 'idにはメールアドレスを入力してください。'
+				'message' => 'メールアドレスを入力してください。'
 			),
 			array(
 				'rule' => array('between', 3, 255),
-				'message' => 'idは3文字以上255文字以内にしてください。'
+				'message' => 'emailは3文字以上255文字以内にしてください。'
 			)
 		),
 		'nickname' => array(

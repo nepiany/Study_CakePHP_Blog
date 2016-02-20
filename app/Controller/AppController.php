@@ -31,4 +31,45 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
+	public $components = array('Session',
+		'Auth' => array(
+			// 以下はデフォルトと同じ設定なので必要ない
+			'loginAction' => array(
+				'controller' => 'users',
+				'action' => 'login'
+			),
+			'loginRedirect' => array(
+				'controller' => 'users',
+				'action' => 'login'
+			),
+			'logoutRedirect' => array(
+				'controller' => 'users',
+				'action' => 'login'
+			),
+			'authError' => 'emailとパスワードを確認してください。', // todo これ何？
+			'authenticate' => array(
+				'Form' => array(
+					'fields' => array(
+						'username' => 'email',
+					)
+				)
+			)
+    	)
+    );
+
+    public function beforeFilter() {
+    	parent::beforeFilter();
+
+    	// ログインが必要かどうかの設定
+		// ここでは全許可して、要ログインのものは個別のコントローラで制御
+		$this->Auth->allow();
+		if ($this->Auth->loggedIn()) {
+			// 無効なユーザの場合はログアウトさせる
+			// if (!$this->User->isValid($this->Auth->user('id'))) {
+			// 	$this->Auth->logout();
+			// }
+			// ユーザ情報をViewで利用可能にしておく
+			$this->set('authUser', $this->Auth->user());
+		}
+    }
 }
