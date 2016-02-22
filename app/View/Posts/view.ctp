@@ -26,7 +26,8 @@
 </p>
 
 <p>
-	<!-- todo タグ.nameを表示 -->
+	<!-- todo タグ.nameを表示
+	-->
 	タグID:
 	<?php foreach ($post['TagRelation'] as $tag) {
 		echo $tag['tag_id'].', ';
