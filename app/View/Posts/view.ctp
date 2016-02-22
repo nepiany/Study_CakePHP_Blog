@@ -9,7 +9,7 @@
 <p>
 	<small>
 		<?php
-			echo $post['PostFavorite']['count'].'人にお気に入りされています';
+			echo $post['PostFavorite']['count'].'人にお気に入りされています<br>';
 			if (isset($authUser)) {
 				// todo 以下のように、ヘルパー作ってisAutherでチェックしたい
 				// if ($this->Post->isAuthor($authUser['id'], $post['Post']['id'])) {
@@ -23,6 +23,15 @@
 			}
 		?>
 	</small>
+</p>
+
+<p>
+	<!-- todo タグ.nameを表示 -->
+	タグID:
+	<?php foreach ($post['TagRelation'] as $tag) {
+		echo $tag['tag_id'].', ';
+	}
+	?>
 </p>
 
 <h2>Comments</h2>

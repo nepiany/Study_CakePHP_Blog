@@ -37,13 +37,16 @@ class PostsController extends AppController {
 		$result['PostFavorite']['count'] = $favoriteCount;
 
 		// 閲覧ユーザがお気に入りしているかを取得
-		$userId = $this->viewVars['authUser']['id'];
-		$isFavorite = $this->PostFavorite->find('count', [
-			'conditions' => [
-				'PostFavorite.user_id' => $userId,
-				'PostFavorite.post_id' => $id
-			],
-		]);
+		$isFavorite = 0;
+		if (isset($this->viewVars['authUser'])) {
+			$userId = $this->viewVars['authUser']['id'];
+			$isFavorite = $this->PostFavorite->find('count', [
+				'conditions' => [
+					'PostFavorite.user_id' => $userId,
+					'PostFavorite.post_id' => $id
+				],
+			]);
+		}
 		// $isFavoriteはcountの結果のままなのでbooleanにする
 		$result['PostFavorite']['isFavorite'] = ($isFavorite > 0);
 
@@ -52,15 +55,26 @@ class PostsController extends AppController {
 
 	// deny
 	public function add() {
+		$this->loadModel('Tag');
+		$tags = $this->Tag->find('all');
+		$this->set('tags', $tags);
 
 		if ($this->request->is('post')) {
 			// todo ここでpostにuserIdをセットしたい
 			//      現在はviewのformにinput:hiddenでセットしている
-
 			// $userId = $this->viewVars['authUser']['id'];
 			// $this->request->data['user_id'] = $userId;
 
-			if ($this->Post->save($this->request->data)) {
+
+			// formで選択されたtagの配列からTagRelation配列を作成し、Postと一緒にsaveAllする
+			$newData['Post'] = $this->request->data['Post'];
+
+			$this->log('check test : '.implode($this->request->data['Post']['Tag']), LOG_DEBUG);
+			foreach ($this->request->data['Post']['Tag'] as $key => $tagId) {
+				$newData['TagRelation'][$key]['tag_id'] = $tagId;
+			}
+
+			if ($this->Post->saveAll($newData)) {
 				//うまく行った場合
 				$this->Session->setFlash('success!');
 				$this->redirect(array('action'=>'index'));

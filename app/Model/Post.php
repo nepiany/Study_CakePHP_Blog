@@ -2,7 +2,13 @@
 
 class Post extends AppModel {
 	public $belongsTo = 'User';
-	public $hasMany = 'Comment';
+	public $hasMany = [
+		'Comment',
+		'TagRelation'=>[
+			'className' => 'TagRelation',
+            'foreignKey' => 'post_id'
+		]
+	];
 
 	public $validate = array(
 		'title' => array(
