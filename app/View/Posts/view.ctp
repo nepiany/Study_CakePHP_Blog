@@ -9,13 +9,14 @@
 <p>
 	<small>
 		<?php
+			echo $post['PostFavorite']['count'].'人にお気に入りされています';
 			if (isset($authUser)) {
 				// todo 以下のように、ヘルパー作ってisAutherでチェックしたい
 				// if ($this->Post->isAuthor($authUser['id'], $post['Post']['id'])) {
 				if ($authUser['id'] === $post['Post']['user_id']) {
 					echo $this->Html->link('編集', array('action'=>'edit', $post['Post']['id']));
 				} else {
-					echo $this->Form->input('お気に入り', array('type'=>'checkbox', 'id'=>'tgl_favorite', 'data-post-id'=>$post['Post']['id']));
+					echo $this->Form->input('お気に入り', array('type'=>'checkbox', 'id'=>'tgl_favorite', 'data-post-id'=>$post['Post']['id'], 'checked'=>$post['PostFavorite']['isFavorite']));
 				}
 			} else {
 				echo $this->Html->link('会員になればお気に入りできます', array('controller'=>'users', 'action'=>'login'));
@@ -51,6 +52,8 @@ $(function () {
 	$('.btn-comment-delete').click(function (e) {
 		if (confirm('sure?')) {
 			// todo 以下deleteのパスを相対指定でなくする
+			//      エラーメッセージ表示
+			//      以下のfavorite系も同様
 			$.post('../../comments/delete/'+$(this).data('comment-id'),
 				{},
 				function (res) {
@@ -63,18 +66,23 @@ $(function () {
 	});
 
 	$('#tgl_favorite').click(function (e) {
+		// 追加成功したら表示が切り替わるようにしたい
 		if ($(this).prop('checked')) {
-			// alert('add favorite' + $(this).data('post-id'));
-			$.post(
-				'../addFavorite/' + $(this).data('post-id'),
-				{},
-				null,
-				'json'
+			$.ajax({
+				url:'../../postFavorites/add/' + $(this).data('post-id'),
+				dataType: "json"
+			}).then(
+				function (data, status, xhr) {
+					// success
+				},
+				function (xhr, status, error) {
+					// fail
+					console.log('FAIL:' + xhr.status + ', ' + status + ', ' + error.message);
+				}
 			);
 		} else {
-			// alert('remove favorite' + $(this).data('post-id'));
 			$.post(
-				'../removeFavorite/' + $(this).data('post-id'),
+				'../../postFavorites/delete/' + $(this).data('post-id'),
 				{},
 				null,
 				'json'

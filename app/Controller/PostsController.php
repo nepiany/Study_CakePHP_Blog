@@ -7,7 +7,7 @@ class PostsController extends AppController {
 	public function beforeFilter() {
 		parent::beforeFilter();
 
-		$this->Auth->deny('add', 'edit', 'delete', 'addFavorite', 'removeFavorite');
+		$this->Auth->deny('add', 'edit', 'delete');
 		$this->Auth->allow('index', 'view');
 	}
 
@@ -25,7 +25,29 @@ class PostsController extends AppController {
 
 	public function view($id = null) {
 		$this->Post->id = $id;
-		$this->set('post', $this->Post->read());
+		$result = $this->Post->read();
+
+		// お気に入りされている数を取得
+		$this->loadModel('PostFavorite');
+		$favoriteCount = $this->PostFavorite->find('count', [
+			'conditions' => [
+				'PostFavorite.post_id' => $id
+			],
+		]);
+		$result['PostFavorite']['count'] = $favoriteCount;
+
+		// 閲覧ユーザがお気に入りしているかを取得
+		$userId = $this->viewVars['authUser']['id'];
+		$isFavorite = $this->PostFavorite->find('count', [
+			'conditions' => [
+				'PostFavorite.user_id' => $userId,
+				'PostFavorite.post_id' => $id
+			],
+		]);
+		// $isFavoriteはcountの結果のままなのでbooleanにする
+		$result['PostFavorite']['isFavorite'] = ($isFavorite > 0);
+
+		$this->set('post', $result);
 	}
 
 	// deny
@@ -76,6 +98,13 @@ class PostsController extends AppController {
 		if ($this->request->is('get')) {
 			throw new MethodNotAllowedException();
 		}
+
+		// 投稿者本人でなければException
+		$userId = $this->viewVars['authUser']['id'];
+		if (!$this->Post->isAuthor($userId, $id)) {
+			throw new Exception('not authorized');
+		}
+
 		// post:$idで削除する場合
 		// if ($this->Post->delete($id)) {
 		// 	$this->Session->setFlash('Deleted!');
@@ -85,12 +114,6 @@ class PostsController extends AppController {
 		// ajaxで削除する場合
 		if ($this->request->is('ajax')) {
 			if ($this->Post->delete($id)) {
-				// 投稿者本人でなければException
-				$userId = $this->viewVars['authUser']['id'];
-				if (!$this->Post->isAuthor($userId, $id)) {
-					throw new Exception('not authorized');
-				}
-
 				$this->autoRender = false;
 				$this->autoLayout = false;
 				$response = array('id' => $id);
@@ -100,19 +123,6 @@ class PostsController extends AppController {
 			}
 		}
 		$this->redirect(array('action' => 'index'));
-	}
-
-	// deny
-	public function addFavorite($postId) {
-		$this->Session->setFlash('add favorite');
-		// $this->PostFavorite->save([
-		// 	'user_id'=>''
-		// ]);
-	}
-
-	// deny
-	public function removeFavorite($postId) {
-		$this->Session->setFlash('remove favorite');
 	}
 }
 
