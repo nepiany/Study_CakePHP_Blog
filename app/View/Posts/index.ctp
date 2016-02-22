@@ -18,6 +18,7 @@
 	</small>
 	<?php
 		// 投稿ユーザならば編集・削除できる
+		// todo 独自ヘルパーとか作ってuser_idのチェックをしたい
 		if (isset($authUser) && $post['User']['id'] === $authUser['id']) {
 			echo $this->Html->link('編集', array('action'=>'edit', $post['Post']['id'])).' ';
 

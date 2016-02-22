@@ -2,7 +2,14 @@
 
 class PostsController extends AppController {
 	// public $scaffold;
-	// public $helpers = array('Html', 'Form');
+	// public $helpers = array('Html', 'Form'); // ←これはデフォルトで使えるみたい
+
+	public function beforeFilter() {
+		parent::beforeFilter();
+
+		$this->Auth->deny('add', 'edit', 'delete', 'addFavorite', 'removeFavorite');
+		$this->Auth->allow('index', 'view');
+	}
 
 	public function index() {
 
@@ -21,14 +28,13 @@ class PostsController extends AppController {
 		$this->set('post', $this->Post->read());
 	}
 
+	// deny
 	public function add() {
 
 		if ($this->request->is('post')) {
-
 			// todo ここでpostにuserIdをセットしたい
-			// if (is_null($this->viewVars['authUser'])) {
-			// 	throw new Exception('not logged in');
-			// }
+			//      現在はviewのformにinput:hiddenでセットしている
+
 			// $userId = $this->viewVars['authUser']['id'];
 			// $this->request->data['user_id'] = $userId;
 
@@ -43,6 +49,7 @@ class PostsController extends AppController {
 		}
 	}
 
+	// deny
 	public function edit($id = null) {
 		$this->Post->id = $id;
 		if ($this->request->is('get')) {
@@ -50,10 +57,6 @@ class PostsController extends AppController {
 		} else {
 
 			// 投稿者本人でなければException
-			if (is_null($this->viewVars['authUser'])) {
-				throw new Exception('not logged in');
-			}
-
 			$userId = $this->viewVars['authUser']['id'];
 			if (!$this->Post->isAuthor($userId, $id)) {
 				throw new Exception('not authorized');
@@ -68,6 +71,7 @@ class PostsController extends AppController {
 		}
 	}
 
+	// deny
 	public function delete($id) {
 		if ($this->request->is('get')) {
 			throw new MethodNotAllowedException();
@@ -82,10 +86,6 @@ class PostsController extends AppController {
 		if ($this->request->is('ajax')) {
 			if ($this->Post->delete($id)) {
 				// 投稿者本人でなければException
-				if (is_null($this->viewVars['authUser']['id'])) {
-					throw new Exception('not logged in');
-				}
-
 				$userId = $this->viewVars['authUser']['id'];
 				if (!$this->Post->isAuthor($userId, $id)) {
 					throw new Exception('not authorized');
@@ -100,6 +100,19 @@ class PostsController extends AppController {
 			}
 		}
 		$this->redirect(array('action' => 'index'));
+	}
+
+	// deny
+	public function addFavorite($postId) {
+		$this->Session->setFlash('add favorite');
+		// $this->PostFavorite->save([
+		// 	'user_id'=>''
+		// ]);
+	}
+
+	// deny
+	public function removeFavorite($postId) {
+		$this->Session->setFlash('remove favorite');
 	}
 }
 

@@ -13,6 +13,7 @@ class UsersController extends AppController {
 
 	public function index() {
 		// /users/のインデックスは無しにしたいので、非ログイン時はログイン、ログイン済みなら/posts/index/にリダイレクト
+		// todo ユーザごとマイページ作成
 		if (isset($this->viewVars['authUser'])) {
 			$this->redirect(array('controller'=>'posts', 'action'=>'index'));
 		} else {
